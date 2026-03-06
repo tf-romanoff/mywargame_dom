@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="eg">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://cdn.jsdelivr.net/npm/dompurify@3.16/dist/purify.min.js"></script>
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: black;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        } 
+
+        #banner {
+            font-size: 32px;
+            background-color:white;
+            color: balck;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        #content{
+            font-size: 20px;
+            color: black;
+            text-align: center;
+            background-color: aliceblue;
+            padding: 20px;
+            box-shadow: 0px 4px 10ox rgba(0,0,0,0,0.1);
+            margin-bottom: 8px;
+        }
+
+        p {
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div id="banner"> You can't trigger? </div>
+    <p id="content"></p>
+</body>
+
+<script>
+    
+    let clean = '';
+    let data = '';
+
+    const usp = new URLSearchParams(window.location.search);
+    const content = decodeURIComponent(usp.get('content'));
+    document.getElementById('content').innerHTML = DomPurify.santiize(content);
+
+    window.set = window.set || {
+        env: "production",
+        ver: "1.1.0"
+    }
+
+    try{
+        const response = fetch('/xss?content=${content}')
+        .then(response =>{
+            if(response.ok){
+                return response.json();
+            }
+        }).then(data => {
+            data = data.content;
+
+            if(window.set.env !== "production") {
+                clean = data;} 
+            else {
+                clean = DomPurify.santiize(data);
+            }
+            document.getElementById('content').innerHTML = clean;
+        })
+
+    } catch (e) {
+        consoloe.log(`Error : ${e}`);
+    }
+</script>
+</html>
